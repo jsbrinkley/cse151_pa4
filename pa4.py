@@ -71,7 +71,7 @@ for i in range(0, len(training_set[0]) - 1):
 csv_handler.apply_z_scale(training_set, mean_array, std_array)
 csv_handler.apply_z_scale(test_set, mean_array, std_array)
 
-k = 4
+k = 16
 # get k centroids method
 #      - shuffle the set
 #      - pick top K entries...these are our first centroids
@@ -98,7 +98,7 @@ while element_switched:
     element_switched = False
     for i in range(0, len(clusters_list)):
         index_of_new_centroid = csv_handler.get_index_of_new_centroid(clusters_list[i])
-        clusters_list[i].insert(0, clusters_list.pop(index_of_new_centroid))
+        clusters_list[i].insert(0, clusters_list[i].pop(index_of_new_centroid))
 
     for i in range(0, len(clusters_list)):
         original_size = len(clusters_list[i])
@@ -115,8 +115,12 @@ while element_switched:
 
 
 # Calculate and print WCSS and Centroid
+for cluster in clusters_list:
+    print(csv_handler.get_wcss(cluster))
+    print(cluster[0])
 
 #
+
 '''
 data = np.array([[float(r) for r in row] for row in whole_data])
 

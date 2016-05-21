@@ -86,3 +86,10 @@ def get_euclidean_distance(point_a, point_b):
     for j in range(0, len(point_a) - 1):
         distance += math.pow((point_a[j] - point_b[j]), 2)
     return math.sqrt(distance)
+
+def get_wcss(cluster):
+    wcss_sum = 0
+    for i in range(1, len(cluster)):
+        wcss_sum += math.pow(get_euclidean_distance(cluster[i], cluster[0]), 2)
+
+    return wcss_sum
