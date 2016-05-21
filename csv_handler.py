@@ -14,6 +14,10 @@ def apply_z_scale(training_set, mean_array, std_array):
         for i in range(0, len(mean_array) - 1):
             element[i] = (element[i] - mean_array[i]) / std_array[i]
 
+def undo_z_scale(training_set, mean_array, std_array):
+    for element in training_set:
+        for i in range(0, len(mean_array) - 1):
+            element[i] = (element[i] * std_array[1]) + mean_array[i]
 
 def get_k_neighbors(training_set, test_data, k):
     k_nearest_neighbors = [(0, 0)] * k
@@ -93,3 +97,60 @@ def get_wcss(cluster):
         wcss_sum += math.pow(get_euclidean_distance(cluster[i], cluster[0]), 2)
 
     return wcss_sum
+
+def qr_decompose (X_train):
+    n = len(X_train)
+    q_accumulated = np.identity(n)
+    r_last = np.mat(X_train)
+    X_train = np.mat(X_train)
+    rows, cols = X_train.shape
+    # 1. get the i-th column of matrix X_train put in Zi
+    for i in range(0, cols):
+
+        e_i = make_e_vector(n)
+        z_i = np.mat(r_last[i:, i])
+
+        # 2. Calculate Vi by:
+        if z_i[0, 0] > 0:
+            e_i *= np.linalg.norm(z_i)
+            e_i[0, 0] *= -1
+            v_i = np.subtract(e_i, z_i)
+        else:
+            v_i = (np.linalg.norm(z_i) * e_i) - z_i
+
+        p_i = np.subtract(np.identity(n), (np.multiply((v_i * v_i.T), (2.0 / ((v_i.T * v_i)[0,0])))))
+        r, c = p_i.shape
+
+        sub_r = r_last[(rows - r):, (rows - c):]
+
+        r_last[rows - r:, rows - c:] = np.dot(p_i, sub_r)
+        n -= 1
+    q = q_accumulated.T
+
+    r = r_last
+    return q, r
+
+def back_solve (R, label_values):
+    rows, cols = R.shape
+    index = cols - 1
+    betas = [1] * cols
+    for i in range(index, -1, -1):
+        sum = 0
+        for j in range(index, -1, -1):
+            if j == i:
+                betas[j] = (label_values[j, 0] - sum) / R[i, j]
+                break
+            else:
+                sum += betas[j] * R[i, j]
+    return np.mat(betas).T
+
+def make_e_vector(n):
+    e = [0.0] * n
+    e[0] = 1.0
+    return np.transpose(np.mat(e))
+
+def make_q_matrix(n, p_i):
+    q = np.identity(n)
+    rows, cols = p_i.shape
+    q[n - rows:, n - cols:] = p_i
+    return np.mat(q)

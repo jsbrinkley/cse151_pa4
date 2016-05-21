@@ -3,25 +3,6 @@ import numpy as np
 import random as rng
 import csv_handler
 
-'''
-RMSEs
-regression-0.05.csv:
-0.0514199089124
-regression-A.csv:
-0.102839817825
-regression-B.csv:
-0.308519453474
-regression-C.csv:
-0.154259726737
-abalone.data:
-2.28
-'''
-# load our data
-#with open('regression-C.csv', 'rb') as csvfile:
-#reader = csv.reader(csvfile, delimiter=',')
-#data = np.array([[float(r) for r in row] for row in reader])
-
-
 whole_data = []
 with open("abalone.data", "r+") as file:
     for line in file:
@@ -57,7 +38,6 @@ test_set = whole_data[train_num:]
 mean_array = []
 std_array = []
 
-# TODO EXCLUDING LAST COLUMN -- -UNSURE
 for i in range(0, len(training_set[0]) - 1):
     attribute_array = []
     for j in range(0, len(training_set)):
@@ -71,7 +51,7 @@ for i in range(0, len(training_set[0]) - 1):
 csv_handler.apply_z_scale(training_set, mean_array, std_array)
 csv_handler.apply_z_scale(test_set, mean_array, std_array)
 
-k = 16
+k = 6
 # get k centroids method
 #      - shuffle the set
 #      - pick top K entries...these are our first centroids
@@ -114,35 +94,18 @@ while element_switched:
 # Repeat the step above until no entry changes cluster
 
 
-# Calculate and print WCSS and Centroid
+#change test set into a matrix
+test_set = np.array([[float(r) for r in row] for row in test_set])
+
+#iterate over clusters to output WCSS & perform linear regression
+# TODO DOn't need to print them out anymore
 for cluster in clusters_list:
+    # Calculate and print WCSS and Centroid
     print(csv_handler.get_wcss(cluster))
     print(cluster[0])
 
 #
 
-'''
-data = np.array([[float(r) for r in row] for row in whole_data])
-
-np.random.seed(99)
-np.random.shuffle(data)
-train_num = int(data.shape[0] * 0.9)
-
-X_train = data[:train_num, :-1]
-Y_train = data[:train_num, -1]
-data_train = data[:train_num, :]
-X_test = data[train_num:, :-1]
-Y_test = data[train_num:, -1]
-# linear least square Y = X beta
-Q, R = p3_helper.qr_decompose(data_train)
-Y_primes = R[:, -1]
-R = R[:, :-1]
-beta = p3_helper.back_solve(R, Y_primes)#np.dot(Q.T, np.mat(Y_train).T))
-print beta
-y_final = np.dot(X_test, beta)
-diff = np.subtract(y_final, np.mat(Y_test).T)
-y_array = np.squeeze(np.asarray((diff)))
-y_array = np.square(y_array)
-mean = np.mean(y_array)
-print np.sqrt(mean)
-'''
+# This is where we need to iterate over our test data and predict its last column
+# maybe pre calculate Beta's of each cluster before we iterate and hold them in a correspoding
+# array to the cluster list.
