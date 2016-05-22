@@ -1,4 +1,7 @@
-import csv
+# James Brinkley,    A11763002
+# Tyler Pitruzzello, A11717294
+
+#  import csv
 import numpy as np
 import random as rng
 import csv_handler
@@ -28,7 +31,7 @@ with open("abalone.data", "r+") as file:
         whole_data.append(data)
 
 
-np.random.seed(99)
+np.random.seed(55)
 np.random.shuffle(whole_data)
 train_num = int(len(whole_data) * 0.9)
 
@@ -51,7 +54,9 @@ for i in range(0, len(training_set[0]) - 1):
 csv_handler.apply_z_scale(training_set, mean_array, std_array)
 csv_handler.apply_z_scale(test_set, mean_array, std_array)
 
-k = 6
+
+
+k = 16
 # get k centroids method
 #      - shuffle the set
 #      - pick top K entries...these are our first centroids
@@ -95,16 +100,40 @@ while element_switched:
 
 
 #change test set into a matrix
-test_set = np.array([[float(r) for r in row] for row in test_set])
+#test_set = np.array([[float(r) for r in row] for row in test_set])
 
 #iterate over clusters to output WCSS & perform linear regression
 # TODO DOn't need to print them out anymore
-for cluster in clusters_list:
+#for cluster in clusters_list:
     # Calculate and print WCSS and Centroid
-    print(csv_handler.get_wcss(cluster))
-    print(cluster[0])
+    #print(csv_handler.get_wcss(cluster))
+    #print(cluster[0])
 
 #
+betas = []
+for cluster in clusters_list:
+    matrix_cluster = np.array([[float(r) for r in row] for row in cluster])
+    X_cluster = matrix_cluster[:, :-1]
+    Y_cluster = matrix_cluster[:, -1]
+
+    beta, _, _, _ = np.linalg.lstsq(X_cluster, Y_cluster)
+
+    betas.append(beta)
+
+
+error_values = []
+for data_entry in test_set:
+    X_row = data_entry[:-1]
+
+    nearest_centroid_index = csv_handler.get_nearest_centroid_index(clusters_list, X_row)
+
+    prediction_value = np.dot(X_row, betas[nearest_centroid_index])
+
+    difference = data_entry[-1] - prediction_value
+    error_values.append(difference ** 2)
+
+print(np.sqrt(np.mean(error_values)))
+
 
 # This is where we need to iterate over our test data and predict its last column
 # maybe pre calculate Beta's of each cluster before we iterate and hold them in a correspoding

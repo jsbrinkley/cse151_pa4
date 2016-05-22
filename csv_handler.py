@@ -1,3 +1,6 @@
+# James Brinkley,    A11763002
+# Tyler Pitruzzello, A11717294
+
 import math
 import random
 import numpy as np
